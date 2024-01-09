@@ -3,6 +3,7 @@ import base64
 from io import BytesIO
 from pathlib import Path
 from PIL import Image
+import requests
 
 import pytesseract
 import pypdfium2 as pdfium
@@ -193,3 +194,81 @@ def pdf_ocr_correct(
             "blocks": blocks
         },
     }
+
+# use this recipe in the  the dataset (images) was annotated with image.manual recipe (default  in prodigy)
+@recipe(
+    "img.ocr.correct",
+    # fmt: off
+    dataset=("Dataset to save answers to", "positional", None, str),
+    source=("Source with PDF Annotations", "positional", None, str),
+    labels=("Labels to consider", "option", "l", split_string),
+    scale=("Zoom scale. Increase above 3 to upscale the image for OCR.", "option", "s", int),
+    remove_base64=("Remove base64-encoded image data", "flag", "R", bool),
+    fold_dashes=("Removes dashes at the end of a textline and folds them with the next term.", "flag", "f", bool),
+    autofocus=("Autofocus on the transcript UI", "flag", "af", bool)
+    # fmt: on
+)
+
+def img_ocr_correct(
+    dataset: str,
+    source: str,
+    labels: str,
+    scale: int = 3,
+    remove_base64:bool=False,
+    fold_dashes:bool = False,
+    autofocus: bool = False
+) -> ControllerComponentsDict:
+    """Applies OCR to annotated segments and gives a textbox for corrections."""
+    stream = get_stream(source)
+
+    def new_stream(stream):
+        for ex in stream:
+            useful_spans = [span for span in ex.get('spans', []) if span['label'] in labels]
+            if useful_spans:
+                
+                if 'image' not in ex:
+                    raise ValueError(f"It seems the `image` key is missing from an example: {ex}. Did you annotate this data with `image.manual`?")
+    
+                # Send a GET request to the URL
+                response = requests.get(ex['image'])
+
+                # Check if the request was successful
+                # if response.status_code == 200:
+                # Open the image from the bytes data
+                pil_page = Image.open(BytesIO(response.content))
+                    
+            for annot in useful_spans:
+                cropped, img_str = page_to_cropped_image(pil_page, span=annot, scale=scale)
+                annot["image_byt"] = img_str
+                annot["text"] = pytesseract.image_to_string(cropped)
+                if fold_dashes:
+                    annot["text"] = fold_ocr_dashes(annot["text"])
+                annot["transcription"] = annot["text"]
+                text_input_fields = {
+                    "field_rows": 12,
+                    "field_label": "Transcript",
+                    "field_id": "transcription",
+                    "field_autofocus": autofocus,
+                }
+                del annot['id']
+                yield set_hashes({**annot, **text_input_fields})
+
+    def before_db(examples):
+        # Remove all data URIs before storing example in the database
+        for eg in examples:
+            if eg["image_byt"].startswith("data:"):
+                del eg["image_byt"]
+        return examples
+    
+    blocks = [{"view_id": "classification"}, {"view_id": "text_input"}]
+
+    return {
+        "dataset": dataset,
+        "stream": new_stream(stream),
+        "before_db": before_db if remove_base64 else None,
+        "view_id": "blocks",
+        "config": {
+            "blocks": blocks
+        },
+    }
+    
