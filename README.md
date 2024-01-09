@@ -1,8 +1,8 @@
 <a href="https://explosion.ai"><img src="https://explosion.ai/assets/img/logo.svg" width="125" height="125" align="right" /></a>
 
-# 📄 Prodigy-PDF
+# 📄 Prodigy-PDF-IMAGE
 
-This repository contains a Prodigy plugin for recipes that annotating PDF files. At the moment it features a recipe that can turn the PDF into an image, which can then be annotated using the familiar `image_manual` interface. Here's a preview of the interface:
+This repository contains a Prodigy plugin for recipes that annotating PDF and image files. At the moment it features a recipe that can turn the PDF into an image, which can then be annotated using the familiar `image_manual` interface. Here's a preview of the interface:
 
 <p align="center">
   <img src="images/pdf_image_manual.png" width="50%">
@@ -12,7 +12,7 @@ This repository contains a Prodigy plugin for recipes that annotating PDF files.
 You can install this plugin via `pip`. 
 
 ```
-pip install "prodigy-pdf @ git+https://github.com/explosion/prodigy-pdf"
+pip install "prodigy-pdf-image @ git+https://github.com/explosion/prodigy-pdf-image"
 ```
 
 If you want to use the OCR recipes, you'll also want to ensure that tesseract is installed. 

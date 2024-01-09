@@ -1,5 +1,5 @@
 from pathlib import Path
-from prodigy_pdf import generate_pdf_pages, fold_ocr_dashes, pdf_image_manual
+from prodigy_pdf_img import generate_pdf_pages, fold_ocr_dashes, pdf_image_manual
 
 
 def test_generate_pdf_pages():
