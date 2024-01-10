@@ -12,7 +12,7 @@ This repository contains a Prodigy plugin for recipes that annotating PDF and im
 You can install this plugin via `pip`. 
 
 ```
-pip install "prodigy-pdf-image @ git+https://github.com/tchuitcheu/prodigy-pdf-image"
+pip install "prodigy-pdf-img @ git+https://github.com/tchuitcheu/prodigy-pdf-image"
 ```
 
 If you want to use the OCR recipes, you'll also want to ensure that tesseract is installed. 

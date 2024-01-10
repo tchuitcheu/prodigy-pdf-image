@@ -236,10 +236,14 @@ def img_ocr_correct(
                 # if response.status_code == 200:
                 # Open the image from the bytes data
                 pil_page = Image.open(BytesIO(response.content))
+                
+                
+
                     
             for annot in useful_spans:
                 cropped, img_str = page_to_cropped_image(pil_page, span=annot, scale=scale)
-                annot["image_byt"] = img_str
+                annot["image_path"] = annot["image"]
+                annot["image"] = img_str
                 annot["text"] = pytesseract.image_to_string(cropped)
                 if fold_dashes:
                     annot["text"] = fold_ocr_dashes(annot["text"])
@@ -256,8 +260,8 @@ def img_ocr_correct(
     def before_db(examples):
         # Remove all data URIs before storing example in the database
         for eg in examples:
-            if eg["image_byt"].startswith("data:"):
-                del eg["image_byt"]
+            if eg["image"].startswith("data:"):
+                del eg["image"]
         return examples
     
     blocks = [{"view_id": "classification"}, {"view_id": "text_input"}]
