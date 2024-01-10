@@ -237,12 +237,10 @@ def img_ocr_correct(
                 # Open the image from the bytes data
                 pil_page = Image.open(BytesIO(response.content))
                 
-                
 
                     
             for annot in useful_spans:
                 cropped, img_str = page_to_cropped_image(pil_page, span=annot, scale=scale)
-                annot["image_path"] = annot["image"]
                 annot["image"] = img_str
                 annot["text"] = pytesseract.image_to_string(cropped)
                 if fold_dashes:
