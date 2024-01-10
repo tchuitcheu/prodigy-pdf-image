@@ -251,8 +251,9 @@ def img_ocr_correct(
                     "field_label": "Transcript",
                     "field_id": "transcription",
                     "field_autofocus": autofocus,
+                    "path_image": ex['image'],
                 }
-                del annot['id']
+                #del annot['id']
                 yield set_hashes({**annot, **text_input_fields})
 
     def before_db(examples):
